@@ -1,12 +1,12 @@
-#+title: Amp Desktop for NixOS
+#+title: Amp flake for NixOS
 #+author: Ad <me@skissue.xyz>
 
-An unofficial flake providing a NixOS repackage of the [[https://ampcode.com/docs/apps/linux][Amp for Linux desktop app]].
+An unofficial flake providing a NixOS repackage of the Amp CLI/runner and the [[https://ampcode.com/docs/apps/linux][Amp for Linux desktop app]].
 
 * Usage
-The flake provides package outputs for both x86-64 and arm64, as well as a nixpkgs overlay.
+The flake provides package outputs for both the CLI/runner and the desktop app for x86-64 and arm64, as well as a nixpkgs overlay.
 
-The default =amp-desktop= package bundles =amp-cli= (from nixpkgs) for the desktop app's embedded runner. Use =amp-desktop-no-runner= to omit the bundled CLI (the app will use its normal CLI discovery).
+The default =amp-desktop= package bundles =amp-cli= (from this flake) for the desktop app's embedded runner. Use =amp-desktop-no-runner= to omit the bundled CLI (the app will use its normal CLI discovery).
 
 Example usage:
 #+begin_src nix
@@ -39,8 +39,12 @@ Example usage:
               nixpkgs.config.allowUnfreePredicate = p: builtins.elem (lib.getName p) ["amp-desktop" "amp-cli"];
               environment.systemPackages = [
                 pkgs.amp-desktop
-                # If you don't want amp-cli from nixpkgs
+
+                # If you don't want amp-cli
                 # pkgs.amp-desktop-no-runner
+
+                # If you only want amp-cli
+                # pkgs.amp-cli
               ];
             }
           )
@@ -50,8 +54,7 @@ Example usage:
   }
 #+end_src
 
-The CLI dependency can also be customized with =pkgs.amp-desktop.override { amp-cli = pkgs.amp-cli; }=,
-or disabled with =pkgs.amp-desktop.override { amp-cli = null; }= (equivalent to =amp-desktop-no-runner=).
+The CLI dependency can also be customized with =pkgs.amp-desktop.override {amp-cli = <amp-cli-from-somewhere-else>; }=, or disabled with =pkgs.amp-desktop.override { amp-cli = null; }= (equivalent to =amp-desktop-no-runner=).
 
 * Known issues
 + The "Open at Login" setting is broken because of the Electron repackaging.
