@@ -1,0 +1,48 @@
+#+title: Amp Desktop for NixOS
+#+author: Ad <me@skissue.xyz>
+
+An unofficial flake providing a NixOS repackage of the [[https://ampcode.com/docs/apps/linux][Amp for Linux desktop app]].
+
+* Usage
+The flake provides a package output for both x86-64 and arm64, as well as a nixpkgs overlay.
+
+Example usage:
+#+begin_src nix
+  {
+    description = "My NixOS configuration";
+
+    inputs = {
+      nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+      amp-desktop = {
+        url = "github:skissue/amp-flake";
+        inputs.nixpkgs.follows = "nixpkgs";
+      };
+    };
+
+    outputs = {
+      nixpkgs,
+      amp-desktop,
+      ...
+    }: {
+      nixosConfigurations.hostname = nixpkgs.lib.nixosSystem {
+        modules = [
+          ./configuration.nix
+          (
+            {
+              lib,
+              pkgs,
+              ...
+            }: {
+              nixpkgs.overlays = [amp-desktop.overlays.default];
+              nixpkgs.config.allowUnfreePredicate = p: lib.getName p == "amp-desktop";
+              environment.systemPackages = [pkgs.amp-desktop];
+            }
+          )
+        ];
+      };
+    };
+  }
+#+end_src
+
+* Known issues
++ The "Open at Login" setting is broken because of the Electron repackaging.
