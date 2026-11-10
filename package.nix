@@ -7,12 +7,12 @@
   electron_44,
   xdg-utils,
 }: let
-  inherit (builtins.fromJSON (builtins.readFile ./sources.json)) version sources;
+  inherit (builtins.fromJSON (builtins.readFile ./sources.json)) sources;
   source = sources.${stdenvNoCC.hostPlatform.system};
 in
   stdenvNoCC.mkDerivation (finalAttrs: {
     pname = "amp-desktop";
-    inherit version;
+    inherit (source) version;
 
     src = fetchurl {
       url = "https://static.ampcode.com/linux/${finalAttrs.version}/amp-desktop-${finalAttrs.version}-${source.arch}.deb";

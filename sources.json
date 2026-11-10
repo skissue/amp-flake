@@ -1,13 +1,14 @@
 {
-  "version": "0.1.29901961",
   "sources": {
     "x86_64-linux": {
+      "version": "0.1.29905321",
       "arch": "amd64",
-      "hash": "sha256-79Kghhg5YlZAE1Z3/P/irAzNlB08OmClGTOkj0ATpW0="
+      "hash": "sha256-3dKloLz0R6zFK9MX1kAc+i7PbRg9CBHy0Q36YicSGgI="
     },
     "aarch64-linux": {
+      "version": "0.1.29905321",
       "arch": "arm64",
-      "hash": "sha256-CckXI7OlNfIib6KYQF0WxA0CmXLa1mD7Iz9suvILUYo="
+      "hash": "sha256-djUvmWdEPN2HnFsalSUPPQuOs7eSsuA6poKWjQclFQ8="
     }
   }
 }
