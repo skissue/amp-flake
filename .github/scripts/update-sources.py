@@ -12,10 +12,11 @@ from urllib.request import urlopen
 def main():
     path = Path(__file__).resolve().parents[2] / "sources.json"
     current = json.loads(path.read_text())
+    platforms = current["sources"]["desktop"]["platforms"]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("system", choices=current["sources"])
+    parser.add_argument("system", choices=platforms)
     system = parser.parse_args().system
-    source = current["sources"][system]
+    source = platforms[system]
     arch = source["arch"]
     url = f"https://static.ampcode.com/linux/dists/stable/main/binary-{arch}/Packages"
     with urlopen(url, timeout=60) as response:
@@ -40,7 +41,7 @@ def main():
     if updated == source:
         print(f"{system} is already up to date ({version})")
         return
-    current["sources"][system] = updated
+    platforms[system] = updated
     path.write_text(json.dumps(current, indent=2) + "\n")
     print(f"Updated {system}: {source['version']} -> {version}")
 

@@ -28,8 +28,14 @@ class UpdateSourcesTest(unittest.TestCase):
             path = root / "sources.json"
             path.write_text(json.dumps({
                 "sources": {
-                    "x86_64-linux": {"version": "0.1.1", "arch": "amd64", "hash": "old-amd64"},
-                    "aarch64-linux": {"version": "0.1.9", "arch": "arm64", "hash": "old-arm64"},
+                    "desktop": {"platforms": {
+                        "x86_64-linux": {"version": "0.1.1", "arch": "amd64", "hash": "old-amd64"},
+                        "aarch64-linux": {"version": "0.1.9", "arch": "arm64", "hash": "old-arm64"},
+                    }},
+                    "cli": {"version": "0.0.123", "platforms": {
+                        "x86_64-linux": {"platform": "linux-x64-baseline", "hash": "cli-amd64"},
+                        "aarch64-linux": {"platform": "linux-arm64", "hash": "cli-arm64"},
+                    }},
                 },
             }))
             original = path.read_bytes()
@@ -63,10 +69,13 @@ class UpdateSourcesTest(unittest.TestCase):
                         "x86_64-linux": ("0.1.2", "sha256-ASNFZ4mrze8BI0VniavN7wEjRWeJq83vASNFZ4mrze8="),
                         "aarch64-linux": ("0.1.10", "sha256-/ty6mHZUMhD+3LqYdlQyEP7cuph2VDIQ/ty6mHZUMhA="),
                     }[system]
-                    self.assertEqual(updated["sources"][system]["version"], expected_version)
-                    self.assertEqual(updated["sources"][system]["hash"], expected_hash)
-                    for other in updated["sources"].keys() - {system}:
-                        self.assertEqual(updated["sources"][other], json.loads(original)["sources"][other])
+                    platforms = updated["sources"]["desktop"]["platforms"]
+                    original_sources = json.loads(original)["sources"]
+                    self.assertEqual(platforms[system]["version"], expected_version)
+                    self.assertEqual(platforms[system]["hash"], expected_hash)
+                    for other in platforms.keys() - {system}:
+                        self.assertEqual(platforms[other], original_sources["desktop"]["platforms"][other])
+                    self.assertEqual(updated["sources"]["cli"], original_sources["cli"])
                     modified = path.stat().st_mtime_ns
                     runpy.run_path(str(script), run_name="__main__")
                     self.assertEqual(path.stat().st_mtime_ns, modified)

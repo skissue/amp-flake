@@ -29,7 +29,7 @@
     );
 
     overlays.default = final: prev: {
-      amp-desktop = final.callPackage ./package.nix {};
+      amp-desktop = final.callPackage ./desktop.nix {};
       amp-desktop-no-runner = final.amp-desktop.override {amp-cli = null;};
     };
 

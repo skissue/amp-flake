@@ -8,8 +8,8 @@
   xdg-utils,
   amp-cli ? null,
 }: let
-  inherit (builtins.fromJSON (builtins.readFile ./sources.json)) sources;
-  source = sources.${stdenvNoCC.hostPlatform.system};
+  release = (builtins.fromJSON (builtins.readFile ./sources.json)).sources.desktop;
+  source = release.platforms.${stdenvNoCC.hostPlatform.system};
 in
   stdenvNoCC.mkDerivation (finalAttrs: {
     pname = "amp-desktop";
@@ -55,7 +55,7 @@ in
       homepage = "https://ampcode.com/docs/apps/linux";
       license = lib.licenses.unfree;
       sourceProvenance = [lib.sourceTypes.fromSource];
-      platforms = builtins.attrNames sources;
+      platforms = builtins.attrNames release.platforms;
       mainProgram = "amp-desktop";
     };
   })

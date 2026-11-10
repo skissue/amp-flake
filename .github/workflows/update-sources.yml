@@ -42,7 +42,7 @@ jobs:
 
           nix build ".#packages.$SYSTEM.amp-desktop" --no-link --print-build-logs
 
-          version=$(jq -r --arg system "$SYSTEM" '.sources[$system].version' sources.json)
+          version=$(jq -r --arg system "$SYSTEM" '.sources.desktop.platforms[$system].version' sources.json)
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- sources.json
