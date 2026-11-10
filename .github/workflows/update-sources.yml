@@ -30,12 +30,12 @@ jobs:
         with:
           ref: ${{ github.event.repository.default_branch }}
       - uses: DeterminateSystems/nix-installer-action@v23
-      - name: Update, build, and push sources
+      - name: Update, build, and push Desktop sources
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           SYSTEM: ${{ matrix.system }}
         run: |
-          python3 .github/scripts/update-sources.py "$SYSTEM"
+          python3 .github/scripts/update-sources.py desktop "$SYSTEM"
           if git diff --quiet -- sources.json; then
             exit 0
           fi
@@ -46,7 +46,25 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- sources.json
-          git commit -m "bump: update to v$version"
+          git commit -m "bump(desktop/$SYSTEM): v$version"
+          git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
+      - name: Update, build, and push CLI sources
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          SYSTEM: ${{ matrix.system }}
+        run: |
+          python3 .github/scripts/update-sources.py cli "$SYSTEM"
+          if git diff --quiet -- sources.json; then
+            exit 0
+          fi
+
+          nix build ".#packages.$SYSTEM.amp-cli" ".#packages.$SYSTEM.amp-desktop" --no-link --print-build-logs
+
+          version=$(jq -r --arg system "$SYSTEM" '.sources.cli.platforms[$system].version' sources.json)
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- sources.json
+          git commit -m "bump(cli/$SYSTEM): v$version"
           git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
       - name: Update, build, and push nixpkgs
         if: matrix.system == 'x86_64-linux'

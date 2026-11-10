@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import runpy
 import shutil
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -19,7 +20,15 @@ class UpdateSourcesTest(unittest.TestCase):
             with self.subTest(failure=failure):
                 self.check_update("aarch64-linux", failure)
 
-    def check_update(self, system, failure=None):
+    def test_cli_update_and_noop(self):
+        for system in ("x86_64-linux", "aarch64-linux"):
+            with self.subTest(system=system):
+                self.check_update(system, package="cli")
+
+    def test_incomplete_cli_release_preserves_file(self):
+        self.check_update("aarch64-linux", "download", package="cli")
+
+    def check_update(self, system, failure=None, package="desktop"):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             script = root / ".github/scripts/update-sources.py"
@@ -32,15 +41,17 @@ class UpdateSourcesTest(unittest.TestCase):
                         "x86_64-linux": {"version": "0.1.1", "arch": "amd64", "hash": "old-amd64"},
                         "aarch64-linux": {"version": "0.1.9", "arch": "arm64", "hash": "old-arm64"},
                     }},
-                    "cli": {"version": "0.0.123", "platforms": {
-                        "x86_64-linux": {"platform": "linux-x64-baseline", "hash": "cli-amd64"},
-                        "aarch64-linux": {"platform": "linux-arm64", "hash": "cli-arm64"},
+                    "cli": {"platforms": {
+                        "x86_64-linux": {"version": "0.0.123", "platform": "linux-x64-baseline", "hash": "cli-amd64"},
+                        "aarch64-linux": {"version": "0.0.234", "platform": "linux-arm64", "hash": "cli-arm64"},
                     }},
                 },
             }))
             original = path.read_bytes()
 
             def fetch(url, timeout):
+                if package == "cli":
+                    return BytesIO(b"0.0.456\n")
                 arch = "amd64" if "binary-amd64/" in url else "arm64"
                 version = "0.1.2" if arch == "amd64" else "0.1.10"
                 digest = "0123456789abcdef" * 4 if arch == "amd64" else "fedcba9876543210" * 4
@@ -57,9 +68,18 @@ class UpdateSourcesTest(unittest.TestCase):
                     f"Filename: {filename}\nSHA256: {digest}\n\n"
                 ).encode())
 
-            with patch("urllib.request.urlopen", side_effect=fetch), patch("sys.argv", [str(script), system]):
+            def prefetch(command, **kwargs):
+                if failure == "download" and command[-1].endswith("amp-linux-arm64.gz"):
+                    raise subprocess.CalledProcessError(1, command)
+                hashes = {
+                    "https://static.ampcode.com/cli/0.0.456/amp-linux-x64-baseline.gz": "sha256-ASNFZ4mrze8BI0VniavN7wEjRWeJq83vASNFZ4mrze8=",
+                    "https://static.ampcode.com/cli/0.0.456/amp-linux-arm64.gz": "sha256-/ty6mHZUMhD+3LqYdlQyEP7cuph2VDIQ/ty6mHZUMhA=",
+                }
+                return subprocess.CompletedProcess(command, 0, json.dumps({"hash": hashes[command[-1]]}))
+
+            with patch("urllib.request.urlopen", side_effect=fetch), patch("subprocess.run", side_effect=prefetch), patch("sys.argv", [str(script), package, system]):
                 if failure:
-                    with self.assertRaises(ValueError):
+                    with self.assertRaises(subprocess.CalledProcessError if package == "cli" else ValueError):
                         runpy.run_path(str(script), run_name="__main__")
                     self.assertEqual(path.read_bytes(), original)
                 else:
@@ -69,13 +89,12 @@ class UpdateSourcesTest(unittest.TestCase):
                         "x86_64-linux": ("0.1.2", "sha256-ASNFZ4mrze8BI0VniavN7wEjRWeJq83vASNFZ4mrze8="),
                         "aarch64-linux": ("0.1.10", "sha256-/ty6mHZUMhD+3LqYdlQyEP7cuph2VDIQ/ty6mHZUMhA="),
                     }[system]
-                    platforms = updated["sources"]["desktop"]["platforms"]
-                    original_sources = json.loads(original)["sources"]
-                    self.assertEqual(platforms[system]["version"], expected_version)
-                    self.assertEqual(platforms[system]["hash"], expected_hash)
-                    for other in platforms.keys() - {system}:
-                        self.assertEqual(platforms[other], original_sources["desktop"]["platforms"][other])
-                    self.assertEqual(updated["sources"]["cli"], original_sources["cli"])
+                    if package == "cli":
+                        expected_version = "0.0.456"
+                    expected = json.loads(original)
+                    expected_source = expected["sources"][package]["platforms"][system]
+                    expected_source.update(version=expected_version, hash=expected_hash)
+                    self.assertEqual(updated, expected)
                     modified = path.stat().st_mtime_ns
                     runpy.run_path(str(script), run_name="__main__")
                     self.assertEqual(path.stat().st_mtime_ns, modified)

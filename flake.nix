@@ -23,12 +23,13 @@
       system: let
         pkgs = pkgsFor system;
       in {
-        inherit (pkgs) amp-desktop amp-desktop-no-runner;
+        inherit (pkgs) amp-cli amp-desktop amp-desktop-no-runner;
         default = self.packages.${system}.amp-desktop;
       }
     );
 
     overlays.default = final: prev: {
+      amp-cli = final.callPackage ./cli.nix {};
       amp-desktop = final.callPackage ./desktop.nix {};
       amp-desktop-no-runner = final.amp-desktop.override {amp-cli = null;};
     };
