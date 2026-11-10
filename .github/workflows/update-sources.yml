@@ -48,3 +48,21 @@ jobs:
           git add -- sources.json
           git commit -m "bump: update to v$version"
           git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
+      - name: Update, build, and push nixpkgs
+        if: matrix.system == 'x86_64-linux'
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          SYSTEM: ${{ matrix.system }}
+        run: |
+          nix flake update nixpkgs
+          if git diff --quiet -- flake.lock; then
+            exit 0
+          fi
+
+          nix build ".#packages.$SYSTEM.amp-desktop" --no-link --print-build-logs
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- flake.lock
+          git commit -m "bump: update nixpkgs"
+          git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
