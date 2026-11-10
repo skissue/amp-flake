@@ -15,7 +15,7 @@
     pkgsFor = system:
       import nixpkgs {
         inherit system;
-        config.allowUnfreePredicate = pkg: nixpkgs.lib.getName pkg == "amp-desktop";
+        config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) ["amp-desktop" "amp-cli"];
         overlays = [self.overlays.default];
       };
   in {
@@ -23,13 +23,14 @@
       system: let
         pkgs = pkgsFor system;
       in {
-        inherit (pkgs) amp-desktop;
+        inherit (pkgs) amp-desktop amp-desktop-no-runner;
         default = self.packages.${system}.amp-desktop;
       }
     );
 
     overlays.default = final: prev: {
       amp-desktop = final.callPackage ./package.nix {};
+      amp-desktop-no-runner = final.amp-desktop.override {amp-cli = null;};
     };
 
     checks.x86_64-linux.vm = import ./vm-test.nix {

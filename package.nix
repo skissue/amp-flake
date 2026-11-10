@@ -6,6 +6,7 @@
   makeWrapper,
   electron_44,
   xdg-utils,
+  amp-cli ? null,
 }: let
   inherit (builtins.fromJSON (builtins.readFile ./sources.json)) sources;
   source = sources.${stdenvNoCC.hostPlatform.system};
@@ -40,6 +41,7 @@ in
 
       makeWrapper ${lib.getExe electron_44} "$out/bin/amp-desktop" \
         --add-flags "$out/share/amp-desktop/app.asar --class=amp-desktop" \
+        ${lib.optionalString (amp-cli != null) "--set-default AMP_DESKTOP_RUNNER_CLI ${lib.getExe amp-cli}"} \
         --suffix PATH : ${lib.makeBinPath [xdg-utils]} \
         --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-wayland-ime=true}}"
 
