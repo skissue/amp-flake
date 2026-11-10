@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - "**/*.nix"
+  pull_request:
+    paths:
+      - "**/*.nix"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - system: x86_64-linux
+            runner: ubuntu-24.04
+          - system: aarch64-linux
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/nix-installer-action@v23
+      - name: Build package
+        env:
+          SYSTEM: ${{ matrix.system }}
+        run: nix build ".#packages.$SYSTEM.amp-desktop" --no-link --print-build-logs
+
+  vm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/nix-installer-action@v23
+      - name: Run VM test
+        run: nix build .#checks.x86_64-linux.vm --no-link --print-build-logs
