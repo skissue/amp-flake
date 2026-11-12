@@ -3,9 +3,9 @@
     "desktop": {
       "platforms": {
         "x86_64-linux": {
-          "version": "0.1.29906641",
+          "version": "0.1.29908343",
           "arch": "amd64",
-          "hash": "sha256-eJBWM6D5BtAtKK/zOqyLf7uyrqioJyI51lqjPTwsAYU="
+          "hash": "sha256-Z3EOt6cupJA/dzqKxJEg9KGRBoknmJlALjNVFzoHwYY="
         },
         "aarch64-linux": {
           "version": "0.1.29906641",
