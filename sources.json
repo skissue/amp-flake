@@ -17,9 +17,9 @@
     "cli": {
       "platforms": {
         "x86_64-linux": {
-          "version": "0.0.1794672034-g01d6fa",
+          "version": "0.0.1794686429-g79beb3",
           "platform": "linux-x64-baseline",
-          "hash": "sha256-vgAqVkO44uqk3kPVco1U500UxRL/eJE5py6/iemCYoE="
+          "hash": "sha256-YtYMEeUntmAK6ewLmZkFTORQtFeoEAE3YEPCC9/7d74="
         },
         "aarch64-linux": {
           "version": "0.0.1794672034-g01d6fa",
