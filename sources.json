@@ -8,9 +8,9 @@
           "hash": "sha256-icC9T/Ho+A4ypBZNe8rxdPy2fu5nFTLv+xWI5ErgbaY="
         },
         "aarch64-linux": {
-          "version": "0.1.29912761",
+          "version": "0.1.29913241",
           "arch": "arm64",
-          "hash": "sha256-UUr/fFPG4JoTC+7rMLLn+WAuEKBvGhoKnEKrMi5fLM8="
+          "hash": "sha256-itD+q7kloqsLtHvYrNR5OivQUjwfJUPBzeqbkDXJM1g="
         }
       }
     },
