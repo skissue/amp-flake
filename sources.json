@@ -22,9 +22,9 @@
           "hash": "sha256-+n0hDRAvsnEwJ7+2OYKHWG+JgdWFmvgZXLddlY7P2jA="
         },
         "aarch64-linux": {
-          "version": "0.0.1794974444-g035056",
+          "version": "0.0.1795032044-gbe7168",
           "platform": "linux-arm64",
-          "hash": "sha256-Xl6IMXx7fJ6vZGpvSkcb8EmU2gXIPyPXyQiYzYWFKGg="
+          "hash": "sha256-UyRCVmpnl/w3CiLkZELSen2f5liqLN/x5lUI5Pd4cac="
         }
       }
     }
