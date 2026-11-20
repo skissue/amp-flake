@@ -17,9 +17,9 @@
     "cli": {
       "platforms": {
         "x86_64-linux": {
-          "version": "0.0.1795147237-g4dbcdb",
+          "version": "0.0.1795204834-g00d70a",
           "platform": "linux-x64-baseline",
-          "hash": "sha256-q4jMl0GFz8Ossgs61QnXwtWxN+8xN9lfIQtea6TCKJE="
+          "hash": "sha256-Mba2RkGd9nMHXV5xK08QQRn0O6ZBv+CjrtgGiDeI/Sc="
         },
         "aarch64-linux": {
           "version": "0.0.1795147237-g4dbcdb",
